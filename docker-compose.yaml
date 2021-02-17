@@ -1,0 +1,47 @@
+version: "3"
+services:
+  back: 
+    image: node:14
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
+    volumes:
+      - ./back:/opt/app:z
+    command: 
+      - /bin/bash
+      - -c
+      - | 
+        cd /opt/app
+        npm install
+        npx nodemon .
+    networks:
+      - accel
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    environment: 
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - accel
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+    networks:
+      - accel
+  consumer:
+    image: node:14
+    volumes:
+      - ./consumer:/opt/app:z
+    command: 
+      - /bin/bash
+      - -c
+      - | 
+        cd /opt/app
+        npm install
+        npx nodemon .
+    networks:
+      - accel
+networks:
+  accel:
